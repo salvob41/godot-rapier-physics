@@ -260,6 +260,14 @@ impl RapierCollisionObjectBase {
                     .get_mut_base()
                     .remove_owner(collision_object.get_base().get_id());
             }
+            // The compound's handle lives on its anchor shape: tear it down while that shape is
+            // still listed, or removing the anchor leaks the collider into the world.
+            collision_object.get_mut_base().destroy_shapes(
+                physics_engine,
+                physics_spaces,
+                physics_ids,
+            );
+            collision_object.get_mut_base().clear_compound();
             collision_object.get_mut_base().state.shapes.remove(p_index);
             Self::recreate_shapes(
                 collision_object,
